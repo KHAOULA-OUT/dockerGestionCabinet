@@ -1,0 +1,151 @@
+<div class="container mt-2">
+    <div class="row">
+        <div class="col col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    Les rendez-vous de {{patient.nomPr}}
+                </div>
+                
+                <ng-container *ngIf="rdvObservable | async as rdvDetails">
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Nom Medecin</th>
+                                <th>Specialite</th>
+                                <th>Consultation</th>
+                            </tr>
+                            
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let op of rdvDetails.rendezVousDTOS">
+                                <td>{{op.id}}</td>
+                                <td>{{op.dateRendezVous}}</td>
+                                <td>{{op.status}}</td>
+                                <td>{{op.medecinDTO.nomPr}}</td>
+                                <td>{{op.medecinDTO.specialite}}</td>
+                                
+                                <td>
+                                    <button id="btnsee" *ngIf="op.hasConsultation" type="button" (click)="onOpenModal(op,'see')" class="btn btn-success">See </button>
+                                    <button (click)="onOpenModal(op,'add')"  *ngIf="!op.hasConsultation" type="button" class="btn btn-success">Add </button>
+                                </td>
+                                
+                            </tr>
+                        </tbody>
+                        
+                    </table>
+                    <ul class="nav nav-pills">
+                        <li *ngFor="let item of [].constructor(rdvDetails.totalPages); let page=index">
+                            <a [ngClass]="page==currentPage?'btn-info':'btn-outline-info'" (click)="gotoPage(page)" class="btn ms-1 mt-1 mb-2">{{page+1}}</a>
+                        </li>
+
+                    </ul>
+
+                </ng-container>
+            </div>
+        </div>
+
+
+        <div class="col col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    Ajouter un rendez-vous pour {{patient.nomPr}}
+                </div>
+                <div class="card-body">
+                    <form method="post" [formGroup]="rdvFormGroup" (ngSubmit)="handleSaveRdv()">
+                         <!-- {{rdvFormGroup.value | json}}  -->
+                        <div class="mb-3">
+                            <label class="form-label">Date de rendez-vous</label>
+                            <input type="date" formControlName="dateRendezVous" class="form-control"/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nom de Medecin</label>
+                            <select class="form-select mt-3" formControlName="nomMedecin" *ngIf="medecinsObservable |async as listmedecin">
+                                <option *ngFor="let m of listmedecin" value="{{m.nomPr}}">
+                                    {{m.nomPr}}
+                                </option>
+                              </select> 
+                        </div>
+                        <div class="d-grid mb-3">
+                            <button class="btn btn-success">Save Rendez-Vous</button>
+                          </div>
+
+                           
+                    </form>
+                </div>
+                
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!--Consultation-->
+<div class="modal fade" id="addConsultModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Consultation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="consultFormGroup" method="post" (ngSubmit)="addConsultation()">
+            <!-- {{consultFormGroup.value | json}} -->
+          <div class="mb-3">
+            <label for="rapport-consultation" class="col-form-label">Rapport Consultation:</label>
+            <textarea formControlName="rapportConsultation" class="form-control" id="rapport-consultation"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="consultation-prix" class="col-form-label">Prix de consultation:</label>
+            <input type="number" class="form-control" formControlName="prixConsultation" id="consultation-prix">
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Add consultation</button>
+            </div>
+            
+        </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- See consultaion info -->
+<div class="modal fade" id="seeconsultation" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="exampleModalLongTitle">Infos consultation</h3>
+          <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button> -->
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <ng-container *ngIf="consultationObservable | async as consult">
+          <h5>Rapport consultation: </h5>
+          <p>{{consult.rapportConsultation}}</p>
+          <hr>
+          <h5>Prix Consultation: </h5>
+          <p>{{consult.prixConsultation}} MAD</p>
+          </ng-container>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-info" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="main-container"></div>
+
+
+

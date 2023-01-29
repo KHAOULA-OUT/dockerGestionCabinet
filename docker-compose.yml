@@ -1,0 +1,43 @@
+version: "3"
+services:
+  databases:
+    image: mysql:latest
+    environment:
+      MYSQL_DATABASE: medical
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 
+    ports:
+      - 3306:3306
+    hostname: databases
+    networks:
+      - net
+
+  backend:
+    container_name: backend
+    build:
+      context: hospital-management
+      dockerfile: Dockerfile
+    networks:
+      - net
+    ports:
+      - 8085:8085
+    depends_on:
+      - databases
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://databases:3306/medical
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 
+  my-app:
+    build:
+      context: medical-frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - 4200:4200
+    depends_on:
+      - backend
+    networks:
+      - net
+
+networks:
+  net:
